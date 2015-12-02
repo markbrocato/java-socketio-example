@@ -10,12 +10,17 @@ var SERVER_PORT = 3000,
 expressApp.use(express.static(__dirname));
 
 io.on('connection', function (socket) {
-    socket.on('message', function(msg) {
-        console.log('socket::message -- ' + msg);
+    socket.on('message', function (r, g, b) {
+        console.log([ r, g, b ]);
+
+        //TODO: possibly construct the JavaScript function entirely in Java?
+        var evalStr = '(' + fn + ')(' + r + ', ' + g + ', ' + b + ')';
+
+        io.emit('ide_request', evalStr);
     });
 });
 
-io.on('message', function(data) {
+io.on('message', function (data) {
     console.log('io::message -- ' + data);
 });
 
@@ -24,26 +29,8 @@ server.listen(SERVER_PORT, function () {
 });
 
 
-var fn = function () {
-    var num = function() {
-        return Math.floor(Math.random() * 10);
-    };
-
-    var r = num(),
-        g = num(),
-        b = num();
-
+var fn = function (r, g, b) {
     Fashion.setVariables({
         '$base_color' : '#' + r + g + b
     });
-
-    //We have to send variables as strings into the inspected window, so we need to JSON encode our data
-    //however, we also need to escape the quote marks to avoid quirky runtime errors
-    //Ext.String.htmlEncode(Ext.JSON.encode(data));
 };
-
-setInterval(function () {
-    var evalStr = '(' + fn + ')()';
-
-    io.emit('ide_request', evalStr);
-}, 5000);
