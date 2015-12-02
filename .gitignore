@@ -10,3 +10,6 @@ buildNumber.properties
 .mvn/timing.properties
 
 .idea
+
+
+/www/build
